@@ -36,8 +36,29 @@
             <div><h3>On-premises investment & operations</h3><div id="onBreakdown"></div></div>
           </div>
         </section>
+        <section class="panel scenario-analysis" id="scenario-analysis">
+          <div class="panelhead"><div><p class="section-index">05 / YOUR CONTRIBUTION</p><h2>Scenario &amp; Sensitivity Analysis</h2></div><p class="muted">See what happens when workload and costs change.</p></div>
+          <p class="analysis-intro">Choose expected growth and server usage. The model will compare good, normal, and difficult conditions automatically.</p>
+          <form id="scenarioInputs" class="scenario-controls">
+            <label>Workload growth per year <span>%</span><input name="workload_growth_rate" type="number" min="0" max="200" step="1" value="5"><small>How fast storage and computing needs increase.</small></label>
+            <label>Server usage <span>%</span><input name="server_utilization" type="number" min="1" max="100" step="1" value="80"><small>Higher usage means fewer servers are required.</small></label>
+            <input name="sensitivity_variation" type="hidden" value="20">
+            <button type="submit">Update comparison</button>
+          </form>
+          <div id="analysisError" class="analysis-error" role="alert" hidden></div>
+          <div id="analysisStatus" class="analysis-status">Loading scenario analysis…</div>
+          <div id="analysisResults" hidden>
+            <h3>Which option is cheapest?</h3>
+            <div class="table-scroll"><table class="scenario-table"><thead><tr><th>Condition</th><th>Cheapest option</th><th>5-year cost</th><th>Lead over 2nd option</th></tr></thead><tbody id="scenarioRows"></tbody></table></div>
+            <p class="table-note">A larger lead does not mean the difficult condition is better. It only means the cheapest and second-cheapest options are farther apart.</p>
+            <div class="recommendation-box"><span>RECOMMENDATION</span><div id="recommendations" class="recommendations"></div></div>
+            <div class="sensitivity-head"><div><h3>What changes the result most?</h3><p class="muted">Each bar shows how much one assumption can change the five-year cost. Longer bar = bigger financial effect.</p></div><strong id="sensitivityWinner"></strong></div>
+            <svg id="tornadoChart" viewBox="0 0 900 300" role="img" aria-label="Most important cost factors"></svg>
+            <details class="scenario-assumptions"><summary>How were these results calculated?</summary><div id="scenarioAssumptions"></div><div id="methodology" class="methodology"></div></details>
+          </div>
+        </section>
         <section class="panel caveat">
-          <p class="section-index">05 / READ THE FINE PRINT</p><h2>A scenario, not a migration recommendation.</h2>
+          <p class="section-index">06 / READ THE FINE PRINT</p><h2>A scenario, not a migration recommendation.</h2>
           <p>Cloud estimates use on-demand VM and Standard object storage list rates with no commitment discounts. Workload storage is decimal TB, converted to billable GiB. AWS S3 uses its 50 TiB and 450 TiB price tiers for each region. Storage API requests, cross-region replication traffic, managed databases, VM disks, egress, taxes, and financing are outside the baseline; enter a monthly allowance above where relevant. Rack fee is a planning allowance for space, with metered power and cooling modeled separately. Obtain a colocator quote to avoid double counting bundled power. Hardware is repurchased at the selected refresh cycle with no salvage value.</p>
           <p>50 physical servers are a conservative one-to-one assumption for 50 VMs; CPU performance, availability, and storage throughput are not benchmarked here. The result is a financial scenario, not a migration recommendation.</p>
         </section>
@@ -52,7 +73,7 @@
             <label>Monthly running time <span>hours</span><input name="hours_per_month" type="number" min="1" step="1"></label>
             <label>Analysis horizon <span>months</span><input name="horizon_months" type="number" min="1" max="600" step="1"></label>
           </div></details>
-          <details><summary>02 / Cloud prices</summary><div class="field-group">
+          <details><summary>02 / Cloud monthly prices</summary><p class="input-help">Open this only when you want to test different AWS or Google Cloud rates.</p><div class="field-group">
             <label>AWS m7i.2xlarge <span>$/hour</span><input name="aws_vm_hourly" type="number" min="0" step="0.000001"></label>
             <label>GCP n2-standard-8 <span>$/hour</span><input name="gcp_vm_hourly" type="number" min="0" step="0.000001"></label>
             <label>GCP Standard storage <span>$/GiB-month</span><input name="gcp_storage_gib_month" type="number" min="0" step="0.000001"></label>
@@ -62,7 +83,7 @@
             <label>AWS S3 above 500 TiB <span>$/GiB-month</span><input name="aws_s3_over_500_rate" type="number" min="0" step="0.000001"></label>
             <label>Other cloud charges, per provider <span>$/month</span><input name="cloud_other_month" type="number" min="0" step="1"></label>
           </div></details>
-          <details><summary>03 / Owned infrastructure</summary><div class="field-group">
+          <details><summary>03 / Your own hardware costs</summary><p class="input-help">These are the costs of buying and operating physical servers. Leave them unchanged if you only want to test workload growth.</p><div class="field-group">
             <label>Compute server purchase <span>$/unit</span><input name="server_purchase" type="number" min="0" step="0.01"></label>
             <label>Storage drive purchase <span>$/unit</span><input name="drive_purchase" type="number" min="0" step="0.01"></label>
             <label>Drive capacity <span>TB</span><input name="drive_tb" type="number" min="1" step="1"></label>

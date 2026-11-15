@@ -26,6 +26,32 @@ The included `example_inputs.json` contains only the fields that differ from the
 
 Run the checks with `python -m unittest discover -s tests -v` from this folder.
 
+## Scenario & sensitivity analysis
+
+The dashboard's advanced analysis section is implemented in `scenario_analysis.py` and calls the original `model.calculate()` function for every point-in-time calculation. This keeps the original price arithmetic and validation rules as the single source of truth.
+
+- **What-if analysis:** every existing dashboard input remains editable. The advanced controls add annual workload growth and server utilization; a change recalculates monthly run rate, year-one spend, three- and five-year totals, break-even, savings, and the winning option.
+- **Best / base / worst cases:** the defaults are input assumptions, not hardcoded results. Best and worst cases apply a transparent ±15% band to selected price inputs, ±20% to hardware lifecycle, ±5 percentage points to growth, and ±10% to utilization. Expand “View the assumptions” in the dashboard to see the effective values. The API also accepts complete custom scenario overrides.
+- **Sensitivity:** nine parameters are varied one at a time around the base case (±20% by default). Impact is `max(abs(low total − base total), abs(high total − base total))` across AWS, GCP, and on-premises five-year totals. Rows are ranked by that calculated value and displayed as a tornado chart.
+- **Recommendations:** the text names the calculated five-year winner, its savings versus the runner-up, relevant break-even behavior, and the highest-ranked sensitivity. No provider is selected by a hardcoded rule.
+
+Growth is compounded monthly: `growth factor at month m = (1 + annual growth)^(m/12)`. Logical storage is multiplied by this factor, while required servers are `ceil(base servers × growth factor / utilization)`. New on-premises capacity is purchased when required, and the then-current hardware estate is repurchased at each lifecycle boundary. There is no inflation, discount rate, financing, salvage value, or workload-price elasticity; correlated changes belong in scenario comparisons rather than the one-at-a-time sensitivity ranking.
+
+The advanced JSON endpoint accepts:
+
+```json
+{
+  "baseline": {
+    "storage_tb": 600,
+    "workload_growth_rate": 0.05,
+    "server_utilization": 0.8
+  },
+  "sensitivity_variation": 0.2
+}
+```
+
+POST this object to `/api/scenario-analysis`. An optional `scenarios` object can map custom scenario names to input overrides.
+
 ## Architecture being priced
 
 | Component | AWS | Google Cloud | Owned hardware / colocation |

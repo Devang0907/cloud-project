@@ -48,6 +48,36 @@ function render(data) {
   document.querySelector('#breakEven').innerHTML=Object.entries(data.cheaper_windows).map(([name,windows])=>`<div><strong>${name}</strong>: ${windows.length?`on-prem cheaper in month${windows.length===1&&windows[0][0]===windows[0][1]?'':'s'} ${windows.map(([start,end])=>start===end?start:`${start}–${end}`).join(', ')}`:'no break-even within the horizon'}</div>`).join('');
   draw(data);
 }
+const compactMoney = n => Math.abs(n) >= 1e6 ? `$${(n/1e6).toFixed(2)}m` : `$${Math.round(n/1e3)}k`;
+const optionLabel = name => name === 'GCP' ? 'Google Cloud' : name;
+function renderTornado(rows) {
+  const svg=document.querySelector('#tornadoChart'), shown=rows.slice(0,5),W=900,H=300,L=210,R=100,T=20,B=20,rowH=(H-T-B)/shown.length;
+  const max=Math.max(...shown.map(row=>row.impact),1), scale=(W-L-R)/max;
+  const grid=[.25,.5,.75,1].map(f=>`<line x1="${L+(W-L-R)*f}" x2="${L+(W-L-R)*f}" y1="${T}" y2="${H-B}" stroke="#dcd8cd"/>`).join('');
+  const bars=shown.map((row,i)=>{const cy=T+i*rowH+rowH/2,w=row.impact*scale;return `<text x="${L-12}" y="${cy+4}" text-anchor="end" font-size="12" fill="#242a25">${row.rank}. ${row.label}</text><rect x="${L}" y="${cy-11}" width="${Math.max(w,2)}" height="22" rx="2" fill="#2c745f"><title>Maximum five-year cost effect: ${money(row.impact)}</title></rect><text x="${Math.min(L+w+8,W-R+8)}" y="${cy+4}" font-size="11" fill="#48534c">${compactMoney(row.impact)}</text>`;}).join('');
+  svg.innerHTML=grid+bars;
+}
+function renderAdvanced(data) {
+  const scenarios=data.scenarios;
+  document.querySelector('#scenarioRows').innerHTML=Object.entries(scenarios).map(([name,s])=>{
+    return `<tr><td><strong>${name.replace('Best case','Good conditions').replace('Base case','Normal conditions').replace('Worst case','Difficult conditions')}</strong></td><td>${optionLabel(s.best_option)}</td><td>${money(s.total_5_year[s.best_option])}</td><td>${money(s.estimated_savings)}</td></tr>`;
+  }).join('');
+  document.querySelector('#scenarioAssumptions').innerHTML='<p><strong>Good conditions:</strong> prices are 15% lower, hardware lasts longer, and server usage improves.</p><p><strong>Normal conditions:</strong> uses the values entered in the dashboard.</p><p><strong>Difficult conditions:</strong> prices are 15% higher, growth is faster, and hardware is replaced sooner.</p>';
+  document.querySelector('#recommendations').innerHTML=`<p>${data.recommendations[0]}</p><p>${data.recommendations.at(-1)}</p>`;
+  document.querySelector('#sensitivityWinner').textContent=`Biggest factor: ${data.sensitivity[0].label}`;
+  document.querySelector('#methodology').innerHTML=`<strong>Method and limitations</strong>${Object.values(data.methodology).map(text=>`<p>${text}</p>`).join('')}`;
+  renderTornado(data.sensitivity);
+  document.querySelector('#analysisStatus').hidden=true;document.querySelector('#analysisResults').hidden=false;
+}
+async function runAdvanced(inputs=getInputs()) {
+  const controls=new FormData(document.querySelector('#scenarioInputs'));
+  const baseline={...inputs,workload_growth_rate:Number(controls.get('workload_growth_rate'))/100,server_utilization:Number(controls.get('server_utilization'))/100};
+  const error=document.querySelector('#analysisError');error.hidden=true;document.querySelector('#analysisStatus').hidden=false;document.querySelector('#analysisStatus').textContent='Recalculating scenarios and sensitivities…';
+  try {
+    const response=await fetch('/api/scenario-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({baseline,sensitivity_variation:Number(controls.get('sensitivity_variation'))/100})});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||'Advanced analysis failed');renderAdvanced(data);
+  } catch(e) { error.textContent=e.message;error.hidden=false;document.querySelector('#analysisStatus').hidden=true; }
+}
 async function calculate(inputs) {
   try {
     const response=await fetch('/api/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(inputs)});
@@ -55,6 +85,7 @@ async function calculate(inputs) {
     if (!response.ok) throw new Error(data.error || 'Calculation failed');
     document.querySelector('#error').hidden=true;
     render(data);
+    runAdvanced(inputs);
   } catch(error) {
     const el=document.querySelector('#error');el.textContent=error.message;el.hidden=false;
   }
@@ -67,4 +98,5 @@ form.addEventListener('input',()=>{
   if (form.checkValidity()) pendingRecalculation=setTimeout(()=>calculate(getInputs()),250);
 });
 document.querySelector('#reset').addEventListener('click',()=>{clearTimeout(pendingRecalculation);setInputs(defaults);calculate(defaults)});
-fetch('/api/defaults').then(r=>r.json()).then(data=>{defaults=data.inputs;setInputs(defaults);render(data)}).catch(e=>{const el=document.querySelector('#error');el.textContent=e.message;el.hidden=false});
+document.querySelector('#scenarioInputs').addEventListener('submit',e=>{e.preventDefault();runAdvanced()});
+fetch('/api/defaults').then(r=>r.json()).then(data=>{defaults=data.inputs;setInputs(defaults);render(data);runAdvanced(defaults)}).catch(e=>{const el=document.querySelector('#error');el.textContent=e.message;el.hidden=false});
