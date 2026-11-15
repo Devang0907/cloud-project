@@ -3,99 +3,82 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Cloud Exit Ledger · Basecamp case study</title>
+  <meta name="theme-color" content="#eaf7ed">
+  <title>Horizon · Cloud repatriation planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <script defer src="/dashboard.js"></script>
 </head>
 <body>
-  <header class="masthead">
-    <div class="wordmark"><span class="mark">C↗</span><span>Cloud Exit <em>Ledger</em></span></div>
-    <div class="masthead-meta">IT457 / THEME 03 <span aria-hidden="true">·</span> BASECAMP CASE STUDY</div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Horizon home"><span class="brand-mark">↗</span><span>Horizon</span></a>
+    <nav aria-label="Primary navigation"><a href="#overview">Overview</a><a href="#compare">Compare</a><a href="#calculator">Calculator</a><a href="#evidence">Evidence</a></nav>
+    <a class="nav-action" href="#calculator">Run the model <span>↘</span></a>
   </header>
-  <main>
-    <section class="intro">
-      <div><p class="eyebrow">37SIGNALS · CLOUD REPATRIATION · FINANCIAL PROOF OF CONCEPT</p><h1>When does leaving the cloud <i>pay?</i></h1><p class="intro-copy">A transparent cost model for a hypothetical Basecamp-scale workload. Adjust the inputs and follow the crossover from monthly bills to long-term ownership.</p></div>
-      <div class="scenario-stamp"><span>THE BASELINE</span><strong>500 <small>TB</small></strong><p>decimal storage · two copies</p><strong>50 <small>servers</small></strong><p>8 vCPU / 32 GiB each</p></div>
-    </section>
-    <div class="layout">
-      <div class="results">
-        <section class="finding"><div><p class="section-index">01 / THE CROSSOVER</p><h2><span id="leadPrefix">Ownership first pulls ahead in </span><span id="leadMonth">—</span></h2><p id="leadCopy">Calculating the first month that owned hardware costs less than the lower-cost cloud option.</p></div><div class="finding-side"><span>AT THE SELECTED HORIZON</span><strong id="horizonVerdict">—</strong><small id="horizonCopy">Cumulative comparison</small></div></section>
-        <div id="error" role="alert" hidden></div>
-        <section class="panel">
-          <div class="panelhead"><div><p class="section-index">02 / THE COST CURVE</p><h2>Cumulative spend</h2></div><p class="muted">Hardware purchase starts at month zero. Each refresh creates another step.</p></div>
-          <div class="chart-scroll" tabindex="0" aria-label="Cost chart, scroll sideways to see the full horizon"><svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Cumulative cost graph"></svg></div>
-          <p class="chart-hint">Scroll sideways to see the full horizon →</p>
-          <div class="legend"><span class="aws">AWS</span><span class="gcp">Google Cloud</span><span class="on">Owned hardware</span></div>
-          <div id="breakEven" class="breakeven"></div>
-        </section>
-        <section class="monthly-section"><div class="panelhead"><div><p class="section-index">03 / MONTHLY RUN RATE</p><h2>What each month costs</h2></div><p class="muted">Before one-time hardware purchase or refresh.</p></div><div class="cards"><article><span>Amazon Web Services</span><strong id="awsMonth">—</strong><small>EC2 + S3 Standard / month</small></article><article><span>Google Cloud</span><strong id="gcpMonth">—</strong><small>Compute Engine + Cloud Storage / month</small></article><article><span>Owned + colocation</span><strong id="onMonth">—</strong><small>Facilities, power, staff / month</small></article></div></section>
-        <section class="panel">
-          <p class="section-index">04 / THE LEDGER</p><h2>Where the money goes</h2>
-          <div class="tables">
-            <div><h3>Monthly cloud bill</h3><div id="cloudBreakdown"></div></div>
-            <div><h3>On-premises investment & operations</h3><div id="onBreakdown"></div></div>
-          </div>
-        </section>
-        <section class="panel caveat">
-          <p class="section-index">05 / READ THE FINE PRINT</p><h2>A scenario, not a migration recommendation.</h2>
-          <p>Cloud estimates use on-demand VM and Standard object storage list rates with no commitment discounts. Workload storage is decimal TB, converted to billable GiB. AWS S3 uses its 50 TiB and 450 TiB price tiers for each region. Storage API requests, cross-region replication traffic, managed databases, VM disks, egress, taxes, and financing are outside the baseline; enter a monthly allowance above where relevant. Rack fee is a planning allowance for space, with metered power and cooling modeled separately. Obtain a colocator quote to avoid double counting bundled power. Hardware is repurchased at the selected refresh cycle with no salvage value.</p>
-          <p>50 physical servers are a conservative one-to-one assumption for 50 VMs; CPU performance, availability, and storage throughput are not benchmarked here. The result is a financial scenario, not a migration recommendation.</p>
-        </section>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-shade"></div><div class="sun-orbit" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="kicker">IT457 · Theme 03 · Basecamp / 37signals case study</p>
+        <h1 id="page-title">Your cloud bill<br>has a <em>horizon.</em></h1>
+        <p class="hero-copy">An interactive repatriation planner for finding the point where owning the infrastructure starts to make financial sense.</p>
+        <div class="hero-actions"><a class="button button-dark" href="#compare">See the crossover <span>↓</span></a><a class="button button-quiet" href="#calculator">Tune your scenario</a></div>
       </div>
-      <aside>
-        <div class="aside-head"><div><p class="section-index">MODEL INPUTS</p><h2>Tune the case</h2></div><button id="reset" type="button">Reset</button></div>
-        <p class="muted">Change a field to recalculate the cost curve. Prices are in USD.</p>
-        <form id="inputs">
-          <details open><summary>01 / Workload</summary><div class="field-group">
-            <label>Logical storage <span>decimal TB</span><input name="storage_tb" type="number" min="0" step="1"></label>
-            <label>Always-on servers <span>count</span><input name="servers" type="number" min="0" step="1"></label>
-            <label>Monthly running time <span>hours</span><input name="hours_per_month" type="number" min="1" step="1"></label>
-            <label>Analysis horizon <span>months</span><input name="horizon_months" type="number" min="1" max="600" step="1"></label>
-          </div></details>
-          <details><summary>02 / Cloud prices</summary><div class="field-group">
-            <label>AWS m7i.2xlarge <span>$/hour</span><input name="aws_vm_hourly" type="number" min="0" step="0.000001"></label>
-            <label>GCP n2-standard-8 <span>$/hour</span><input name="gcp_vm_hourly" type="number" min="0" step="0.000001"></label>
-            <label>GCP Standard storage <span>$/GiB-month</span><input name="gcp_storage_gib_month" type="number" min="0" step="0.000001"></label>
-            <label>Cloud storage copies <span>regions</span><input name="cloud_storage_copies" type="number" min="1" step="1"></label>
-            <label>AWS S3 first 50 TiB <span>$/GiB-month</span><input name="aws_s3_first_50_rate" type="number" min="0" step="0.000001"></label>
-            <label>AWS S3 next 450 TiB <span>$/GiB-month</span><input name="aws_s3_next_450_rate" type="number" min="0" step="0.000001"></label>
-            <label>AWS S3 above 500 TiB <span>$/GiB-month</span><input name="aws_s3_over_500_rate" type="number" min="0" step="0.000001"></label>
-            <label>Other cloud charges, per provider <span>$/month</span><input name="cloud_other_month" type="number" min="0" step="1"></label>
-          </div></details>
-          <details><summary>03 / Owned infrastructure</summary><div class="field-group">
-            <label>Compute server purchase <span>$/unit</span><input name="server_purchase" type="number" min="0" step="0.01"></label>
-            <label>Storage drive purchase <span>$/unit</span><input name="drive_purchase" type="number" min="0" step="0.01"></label>
-            <label>Drive capacity <span>TB</span><input name="drive_tb" type="number" min="1" step="1"></label>
-            <label>Storage copies <span>count</span><input name="storage_copies" type="number" min="1" step="1"></label>
-            <label>Disk fill ratio <span>0–1</span><input name="storage_fill" type="number" min="0.1" max="1" step="0.05"></label>
-            <label>Minimum storage enclosures <span>count</span><input name="storage_enclosures" type="number" min="0" step="1"></label>
-            <label>Enclosure purchase <span>$/unit</span><input name="storage_enclosure_purchase" type="number" min="0" step="1"></label>
-            <label>Network hardware purchase <span>$</span><input name="network_hardware_purchase" type="number" min="0" step="1"></label>
-            <label>One-time migration <span>$</span><input name="migration_once" type="number" min="0" step="1"></label>
-            <label>Rack space <span>$/rack-month</span><input name="rack_space_month" type="number" min="0" step="1"></label>
-            <label>Racks across two sites <span>count</span><input name="racks" type="number" min="0" step="1"></label>
-            <label>Server IT draw <span>kW/unit</span><input name="server_kw" type="number" min="0" step="0.05"></label>
-            <label>Storage enclosure IT draw <span>kW/unit</span><input name="enclosure_kw" type="number" min="0" step="0.05"></label>
-            <label>Network IT draw <span>kW</span><input name="network_kw" type="number" min="0" step="0.1"></label>
-            <label>Commercial electricity <span>$/kWh</span><input name="electricity_kwh" type="number" min="0" step="0.0001"></label>
-            <label>Facility PUE <span>ratio</span><input name="pue" type="number" min="1" step="0.1"></label>
-            <label>Incremental staff <span>FTE</span><input name="staff_fte" type="number" min="0" step="0.1"></label>
-            <label>Annual staff salary <span>$/FTE</span><input name="staff_salary_year" type="number" min="0" step="1"></label>
-            <label>Staff burden <span>multiplier</span><input name="staff_burden" type="number" min="0" step="0.05"></label>
-            <label>Maintenance reserve <span>fraction/year</span><input name="maintenance_year_fraction" type="number" min="0" step="0.01"></label>
-            <label>Hardware refresh cycle <span>months</span><input name="hardware_life_months" type="number" min="1" step="1"></label>
-            <label>Other on-prem costs <span>$/month</span><input name="onprem_other_month" type="number" min="0" step="1"></label>
-          </div></details>
-          <button type="submit">Recalculate</button>
-        </form>
-      </aside>
-    </div>
-    <section class="sources panel"><h2>Sources and price checks</h2><p class="muted">Rates checked 28 October 2026. Purchases and facility planning assumptions can change; verify in the official calculators before submission.</p><ul>
-      <li><a href="https://calculator.aws/#/estimate?id=fd7136cb7c6888e8742a1ea9dfd0009810486920" target="_blank" rel="noopener">Saved AWS estimate</a> · <a href="https://aws.amazon.com/s3/pricing/" target="_blank" rel="noopener">S3 rates</a> · <a href="https://aws.amazon.com/ec2/instance-types/m7i/" target="_blank" rel="noopener">m7i specifications</a></li>
-      <li><a href="https://cloud.google.com/products/calculator/estimate-preview/CiQ3NGU1OTRiNi0xNDhkLTQ5NDEtYjY1Mi01MWRkNmRlMWJkNWMQAQ%3D%3D" target="_blank" rel="noopener">Saved Google Cloud estimate</a> · <a href="https://cloud.google.com/products/compute/pricing/general-purpose" target="_blank" rel="noopener">N2 rates</a> · <a href="https://cloud.google.com/storage/pricing" target="_blank" rel="noopener">Cloud Storage rates</a></li>
-      <li><a href="https://www.dell.com/en-us/shop/ipovw/poweredge-r570" target="_blank" rel="noopener">Dell PowerEdge R570 price anchor</a> · <a href="https://www.bhphotovideo.com/c/product/1944646-REG/seagate_st32000nm004k_32tb_exos_m_7200.html/overview" target="_blank" rel="noopener">32 TB Exos drive quote</a> · <a href="https://www.astuteinternet.com/services/colocation/order" target="_blank" rel="noopener">Colocation rack price anchor</a></li>
-      <li><a href="https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_es1a" target="_blank" rel="noopener">EIA commercial electricity</a> · <a href="https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm" target="_blank" rel="noopener">BLS systems administrator salary</a></li>
-    </ul></section>
+      <aside class="hero-benchmark" aria-label="Baseline workload"><span>Baseline workload</span><strong>500 TB</strong><small>50 always-on servers<br>8 vCPU · 32 GiB each</small></aside>
+      <div class="hero-footer"><span>US regions · USD · decimal storage</span><span>Scroll to model <b>↓</b></span></div>
+    </section>
+
+    <section class="context-band" id="overview">
+      <div><p class="section-tag">The question</p><h2>What does “leave the cloud” look like in dollars?</h2></div>
+      <p>Horizon compares two public-cloud baselines with a transparent owned-infrastructure model: hardware, power, colocation, staffing, maintenance, refreshes, and migration.</p>
+      <div class="model-note"><span>Model is live</span><strong>Adjust any assumption →</strong></div>
+    </section>
+
+    <section class="dashboard" id="compare">
+      <div class="section-intro"><div><p class="section-tag">01 · Crossover view</p><h2>The long view,<br><em>without the fog.</em></h2></div><p>Costs are cumulative so the upfront purchase and recurring operating cost are visible in the same frame.</p></div>
+      <div class="signal-card" id="calculator">
+        <div class="signal-copy"><p class="section-tag">Decision signal</p><h3><span id="leadPrefix">Ownership first pulls ahead in </span><span id="leadMonth">—</span></h3><p id="leadCopy">Calculating the first month that owned hardware costs less than the lower-cost cloud option.</p></div>
+        <div class="signal-verdict"><span>At the selected horizon</span><strong id="horizonVerdict">—</strong><small id="horizonCopy">Cumulative comparison</small></div>
+      </div>
+      <div id="error" role="alert" hidden></div>
+      <section class="chart-card" aria-labelledby="chart-title">
+        <div class="card-head"><div><p class="section-tag">Cumulative spend</p><h3 id="chart-title">The cost curve</h3></div><p>Hardware purchase starts at month zero. A refresh creates the next step.</p></div>
+        <div class="chart-scroll" tabindex="0" aria-label="Cumulative cost chart. Scroll horizontally to see the full horizon."><svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Cumulative cost graph"></svg></div>
+        <div class="chart-meta"><div class="legend"><span class="aws">AWS</span><span class="gcp">Google Cloud</span><span class="on">Owned infrastructure</span></div><div id="breakEven" class="breakeven"></div></div>
+      </section>
+
+      <section class="run-rate" aria-labelledby="run-rate-title"><div class="card-head"><div><p class="section-tag">Monthly run rate</p><h3 id="run-rate-title">What one month costs</h3></div><p>Operating cost before a hardware purchase or refresh.</p></div><div class="rate-grid">
+        <article class="rate-card aws-card"><span>Amazon Web Services</span><strong id="awsMonth">—</strong><small>EC2 + S3 Standard / month</small><i>01</i></article>
+        <article class="rate-card gcp-card"><span>Google Cloud</span><strong id="gcpMonth">—</strong><small>Compute Engine + Cloud Storage / month</small><i>02</i></article>
+        <article class="rate-card on-card"><span>Owned + colocation</span><strong id="onMonth">—</strong><small>Facilities, power & staff / month</small><i>03</i></article>
+      </div></section>
+
+      <div class="ledger-grid"><section class="ledger-card"><div class="card-head"><div><p class="section-tag">Cloud bill</p><h3>Where cloud spend lands</h3></div></div><div id="cloudBreakdown"></div></section><section class="ledger-card"><div class="card-head"><div><p class="section-tag">Owned estate</p><h3>Investment & operations</h3></div></div><div id="onBreakdown"></div></section></div>
+
+      <section class="caveat"><div><p class="section-tag">Use it well</p><h3>A decision aid, not a migration order.</h3></div><p>These are transparent planning assumptions, not a performance benchmark. Commitment discounts, egress, VM disks, managed services, taxes, financing, and outage risk sit outside the baseline. Use the official calculators and supplier quotes before a real procurement decision.</p></section>
+    </section>
+
+    <section class="tuner-shell" aria-labelledby="tuner-title"><div class="tuner-intro"><p class="section-tag">02 · Scenario tuner</p><h2 id="tuner-title">Make the case<br>your <em>own.</em></h2><p>Every field updates the chart and the decision signal. Reset returns to the documented Basecamp-scale baseline.</p><div class="tuner-quote">“The cloud is a choice,<br>not a gravity well.”</div></div>
+      <form id="inputs" class="tuner">
+        <div class="tuner-head"><div><span>Active scenario</span><strong>USD · US regions</strong></div><button id="reset" type="button">Reset baseline ↺</button></div>
+        <details open><summary><span>01</span> Workload <small>the scale you serve</small></summary><div class="field-group compact-fields">
+          <label>Logical storage <span>decimal TB</span><input name="storage_tb" type="number" min="0" step="1"></label><label>Always-on servers <span>count</span><input name="servers" type="number" min="0" step="1"></label><label>Monthly running time <span>hours</span><input name="hours_per_month" type="number" min="1" step="1"></label><label>Analysis horizon <span>months</span><input name="horizon_months" type="number" min="1" max="600" step="1"></label>
+        </div></details>
+        <details><summary><span>02</span> Cloud price assumptions <small>compute, storage & overhead</small></summary><div class="field-group">
+          <label>AWS m7i.2xlarge <span>$/hour</span><input name="aws_vm_hourly" type="number" min="0" step="0.000001"></label><label>GCP n2-standard-8 <span>$/hour</span><input name="gcp_vm_hourly" type="number" min="0" step="0.000001"></label><label>GCP Standard storage <span>$/GiB-month</span><input name="gcp_storage_gib_month" type="number" min="0" step="0.000001"></label><label>Cloud storage copies <span>regions</span><input name="cloud_storage_copies" type="number" min="1" step="1"></label><label>AWS S3 first 50 TiB <span>$/GiB-month</span><input name="aws_s3_first_50_rate" type="number" min="0" step="0.000001"></label><label>AWS S3 next 450 TiB <span>$/GiB-month</span><input name="aws_s3_next_450_rate" type="number" min="0" step="0.000001"></label><label>AWS S3 above 500 TiB <span>$/GiB-month</span><input name="aws_s3_over_500_rate" type="number" min="0" step="0.000001"></label><label>Other cloud charges, per provider <span>$/month</span><input name="cloud_other_month" type="number" min="0" step="1"></label>
+        </div></details>
+        <details><summary><span>03</span> Owned infrastructure <small>hardware, facility & people</small></summary><div class="field-group">
+          <label>Compute server purchase <span>$/unit</span><input name="server_purchase" type="number" min="0" step="0.01"></label><label>Storage drive purchase <span>$/unit</span><input name="drive_purchase" type="number" min="0" step="0.01"></label><label>Drive capacity <span>TB</span><input name="drive_tb" type="number" min="1" step="1"></label><label>Storage copies <span>count</span><input name="storage_copies" type="number" min="1" step="1"></label><label>Disk fill ratio <span>0–1</span><input name="storage_fill" type="number" min="0.1" max="1" step="0.05"></label><label>Minimum storage enclosures <span>count</span><input name="storage_enclosures" type="number" min="0" step="1"></label><label>Enclosure purchase <span>$/unit</span><input name="storage_enclosure_purchase" type="number" min="0" step="1"></label><label>Network hardware purchase <span>$</span><input name="network_hardware_purchase" type="number" min="0" step="1"></label><label>One-time migration <span>$</span><input name="migration_once" type="number" min="0" step="1"></label><label>Rack space <span>$/rack-month</span><input name="rack_space_month" type="number" min="0" step="1"></label><label>Racks across two sites <span>count</span><input name="racks" type="number" min="0" step="1"></label><label>Server IT draw <span>kW/unit</span><input name="server_kw" type="number" min="0" step="0.05"></label><label>Storage enclosure IT draw <span>kW/unit</span><input name="enclosure_kw" type="number" min="0" step="0.05"></label><label>Network IT draw <span>kW</span><input name="network_kw" type="number" min="0" step="0.1"></label><label>Commercial electricity <span>$/kWh</span><input name="electricity_kwh" type="number" min="0" step="0.0001"></label><label>Facility PUE <span>ratio</span><input name="pue" type="number" min="1" step="0.1"></label><label>Incremental staff <span>FTE</span><input name="staff_fte" type="number" min="0" step="0.1"></label><label>Annual staff salary <span>$/FTE</span><input name="staff_salary_year" type="number" min="0" step="1"></label><label>Staff burden <span>multiplier</span><input name="staff_burden" type="number" min="0" step="0.05"></label><label>Maintenance reserve <span>fraction/year</span><input name="maintenance_year_fraction" type="number" min="0" step="0.01"></label><label>Hardware refresh cycle <span>months</span><input name="hardware_life_months" type="number" min="1" step="1"></label><label>Other on-prem costs <span>$/month</span><input name="onprem_other_month" type="number" min="0" step="1"></label>
+        </div></details>
+        <button class="calculate" type="submit">Recalculate horizon <span>→</span></button>
+      </form>
+    </section>
+
+    <section class="evidence" id="evidence"><div><p class="section-tag">Evidence ledger</p><h2>Inputs worth<br><em>checking.</em></h2><p>Price anchors were checked on 28 October 2026. Use the primary sources before submission or procurement.</p></div><ul><li><span>AWS</span><a href="https://calculator.aws/#/estimate?id=fd7136cb7c6888e8742a1ea9dfd0009810486920" target="_blank" rel="noopener">Saved estimate ↗</a><a href="https://aws.amazon.com/s3/pricing/" target="_blank" rel="noopener">S3 pricing ↗</a></li><li><span>Google Cloud</span><a href="https://cloud.google.com/products/calculator/estimate-preview/CiQ3NGU1OTRiNi0xNDhkLTQ5NDEtYjY1Mi01MWRkNmRlMWJkNWMQAQ%3D%3D" target="_blank" rel="noopener">Saved estimate ↗</a><a href="https://cloud.google.com/storage/pricing" target="_blank" rel="noopener">Storage pricing ↗</a></li><li><span>Owned estate</span><a href="https://www.dell.com/en-us/shop/ipovw/poweredge-r570" target="_blank" rel="noopener">Dell R570 ↗</a><a href="https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_es1a" target="_blank" rel="noopener">EIA electricity ↗</a></li></ul></section>
   </main>
+  <footer><span>Horizon / Basecamp cloud repatriation study</span><span>Built for IT457 · financial proof of concept</span></footer>
 </body>
 </html>

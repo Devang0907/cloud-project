@@ -20,7 +20,13 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self):
-        files = {"/": ("index.html", "text/html"), "/style.css": ("style.css", "text/css"), "/dashboard.js": ("dashboard.js", "text/javascript")}
+        files = {
+            "/": ("index.html", "text/html"),
+            "/style.css": ("style.css", "text/css"),
+            "/dashboard.js": ("dashboard.js", "text/javascript"),
+            "/assets/horizon-hills.png": ("assets/horizon-hills.png", "image/png"),
+            "/assets/pexels-ian-panelo-8726326.jpg": ("assets/pexels-ian-panelo-8726326.jpg", "image/jpeg"),
+        }
         if self.path == "/api/defaults":
             return self.send_json(200, calculate())
         if self.path not in files:
