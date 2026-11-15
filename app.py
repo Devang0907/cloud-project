@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from model import calculate
+from scenario_analysis import analyze
 
 ROOT = Path(__file__).resolve().parent
 
@@ -34,14 +35,15 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
-        if self.path != "/api/calculate":
+        if self.path not in {"/api/calculate", "/api/scenario-analysis"}:
             return self.send_json(404, {"error": "Not found"})
         try:
             size = int(self.headers.get("Content-Length", "0"))
             if size < 1 or size > 100_000:
                 raise ValueError("Request size must be between 1 and 100000 bytes")
             updates = json.loads(self.rfile.read(size))
-            return self.send_json(200, calculate(updates))
+            result = analyze(updates) if self.path == "/api/scenario-analysis" else calculate(updates)
+            return self.send_json(200, result)
         except (ValueError, json.JSONDecodeError) as exc:
             return self.send_json(400, {"error": str(exc)})
 
