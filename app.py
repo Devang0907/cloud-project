@@ -5,10 +5,12 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from config import load_dotenv
 from model import calculate
 from pricing import refresh_prices
 
 ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
 
 
 class Handler(BaseHTTPRequestHandler):

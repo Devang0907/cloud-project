@@ -96,7 +96,16 @@ Important unpriced items: storage requests, cross-region replication traffic, in
 
 ## Optional official price refresh
 
-Install the AWS SDK with `python -m pip install boto3`. Configure an AWS profile or role with `pricing:GetProducts` permission. Enable the Cloud Billing API in your Google Cloud project and set `GOOGLE_CLOUD_API_KEY` in the environment that starts the Python server.
+Install the Python dependency with `python -m pip install -r requirements.txt`. Configure an AWS profile or role with `pricing:GetProducts` permission. Enable the Cloud Billing API in your Google Cloud project. For local development, add the credentials to a `.env` file beside `app.py` (the server loads it automatically):
+
+```dotenv
+GOOGLE_CLOUD_API_KEY=your-google-api-key
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+# AWS_SESSION_TOKEN=include-this-too-for-temporary-credentials
+```
+
+Values already set in the server environment take precedence over `.env`. Restart the Python server after changing the file. Keep `.env` private; it is excluded by this repository's `.gitignore`.
 
 In Scenario tuner, select **Refresh cloud prices**. The server looks up Linux shared On-Demand m7i.2xlarge compute and S3 Standard in us-east-1, plus Google N2 Americas CPU and RAM and US regional Standard storage. The scenario applies the selected storage rate to each copy. Hourly Google storage prices are converted using 730 hours per billing month. The fetch timestamp appears after both providers respond. Reset baseline restores the rates used for the saved calculator comparison.
 
