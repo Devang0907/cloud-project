@@ -111,13 +111,16 @@ function render(data) {
   draw(data);
 }
 async function calculate(inputs) {
+  const version = ++calculationVersion;
   try {
     const response=await fetch('/api/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(inputs)});
     const data=await response.json();
+    if (version !== calculationVersion) return;
     if (!response.ok) throw new Error(data.error || 'Calculation failed');
     document.querySelector('#error').hidden=true;
     render(data);
   } catch(error) {
+    if (version !== calculationVersion) return;
     const el=document.querySelector('#error');el.textContent=error.message;el.hidden=false;
   }
 }
@@ -128,6 +131,38 @@ form.addEventListener('input',()=>{
   clearTimeout(pendingRecalculation);
   if (form.checkValidity()) pendingRecalculation=setTimeout(()=>calculate(getInputs()),250);
 });
-document.querySelector('#reset').addEventListener('click',()=>{clearTimeout(pendingRecalculation);setInputs(defaults);calculate(defaults)});
-fetch('/api/defaults').then(r=>r.json()).then(data=>{defaults=data.inputs;setInputs(defaults);render(data)}).catch(e=>{const el=document.querySelector('#error');el.textContent=e.message;el.hidden=false});
+let calculationVersion = 0;
+let refreshVersion = 0;
+const refreshButton = document.querySelector('#refreshPrices');
+const priceStatus = document.querySelector('#priceStatus');
+refreshButton.addEventListener('click', async () => {
+  const version = ++refreshVersion;
+  refreshButton.disabled = true;
+  priceStatus.hidden = false;
+  priceStatus.textContent = 'Fetching official AWS and Google Cloud rates…';
+  try {
+    const response = await fetch('/api/prices/refresh', {method:'POST', headers:{'Content-Type':'application/json'}});
+    const result = await response.json();
+    if (version !== refreshVersion) return;
+    if (!response.ok) throw new Error(result.error);
+    setInputs(result.rates);
+    clearTimeout(pendingRecalculation);
+    priceStatus.textContent = 'Official rates fetched ' + new Date(result.fetched_at).toLocaleString() + '.';
+    await calculate(getInputs());
+  } catch (error) {
+    if (version === refreshVersion) priceStatus.textContent = error.message;
+  } finally {
+    if (version === refreshVersion) refreshButton.disabled = false;
+  }
+});
+document.querySelector('#reset').addEventListener('click',()=>{
+  if (!defaults) return;
+  ++refreshVersion;
+  refreshButton.disabled = false;
+  priceStatus.hidden = true;
+  clearTimeout(pendingRecalculation);
+  setInputs(defaults);
+  calculate(defaults);
+});
+fetch('/api/defaults').then(r=>r.json()).then(data=>{defaults=data.inputs;setInputs(defaults);render(data);refreshButton.disabled=false}).catch(e=>{const el=document.querySelector('#error');el.textContent=e.message;el.hidden=false});
 

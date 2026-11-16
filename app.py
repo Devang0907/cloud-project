@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from model import calculate
+from pricing import refresh_prices
 
 ROOT = Path(__file__).resolve().parent
 
@@ -40,6 +41,13 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
+        if self.path == "/api/prices/refresh":
+            if self.headers.get("Content-Type") != "application/json":
+                return self.send_json(415, {"error": "Expected application/json"})
+            try:
+                return self.send_json(200, refresh_prices())
+            except RuntimeError as exc:
+                return self.send_json(503, {"error": str(exc)})
         if self.path != "/api/calculate":
             return self.send_json(404, {"error": "Not found"})
         try:

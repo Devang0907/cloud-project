@@ -4,10 +4,10 @@ An IT457 Theme 3 MVP: a Python cost calculator with a local dashboard, an archit
 
 ## Run
 
-Requires Python 3.10 or newer. There are no third-party Python packages.
+Requires Python 3.10 or newer. The baseline runs with the Python standard library.
 
 ```powershell
-cd 'D:\MTech Sem 1 Projects\Cloud Project\repatriation_mvp'
+# Run from the project directory
 python app.py --serve
 ```
 
@@ -93,3 +93,11 @@ All rates are editable in `model.py`, through the dashboard, or via a JSON overr
 37signals reported [2022 AWS spending of $3.20 million](https://dev.37signals.com/our-cloud-spend-in-2022/) and later described a [roughly $700,000 Dell purchase and nearly $2 million reduction in its annual cloud bill](https://world.hey.com/dhh/our-cloud-exit-savings-will-now-top-ten-million-over-five-years-c7d9b5bd). Its [migration of seven apps took about six months](https://world.hey.com/dhh/we-have-left-the-cloud-251760fb). Those are company-reported facts about a different workload with existing racks and staff; they are **not** substituted into this hypothetical model.
 
 Important unpriced items: storage requests, cross-region replication traffic, internet egress, load balancers, managed database/cache/search, VM block disks, software licenses, backup beyond the two copies, financing, tax, downtime, staffing coverage, and hardware performance validation. Enter defensible monthly allowances or extend the model once measured workload data is available. The financial result is sensitive to on-premises server count and price, rack contracts, staff allocation, power draw, and refresh cycle. Run sensitivity cases before recommending a migration.
+
+## Optional official price refresh
+
+Install the AWS SDK with `python -m pip install boto3`. Configure an AWS profile or role with `pricing:GetProducts` permission. Enable the Cloud Billing API in your Google Cloud project and set `GOOGLE_CLOUD_API_KEY` in the environment that starts the Python server.
+
+In Scenario tuner, select **Refresh cloud prices**. The server looks up Linux shared On-Demand m7i.2xlarge compute and S3 Standard in us-east-1, plus Google N2 Americas CPU and RAM and US regional Standard storage. The scenario applies the selected storage rate to each copy. Hourly Google storage prices are converted using 730 hours per billing month. The fetch timestamp appears after both providers respond. Reset baseline restores the rates used for the saved calculator comparison.
+
+[AWS Price List](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/price-changes.html) · [Google Cloud price API](https://docs.cloud.google.com/billing/docs/how-to/get-pricing-information-api)
