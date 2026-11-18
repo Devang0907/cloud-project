@@ -14,10 +14,16 @@ def google_rate(key, sku, units):
     )
     with urlopen(request, timeout=12) as response:
         rate = json.load(response)["rate"]
-    tier, = rate["tiers"]
+    tiers = rate["tiers"]
+    paid_tiers = [tier for tier in tiers
+                  if float(tier["listPrice"].get("units", 0))
+                  + tier["listPrice"].get("nanos", 0) / 1e9 > 0]
+    if len(paid_tiers) != 1:
+        raise ValueError("Unexpected Google pricing tiers")
+    tier = paid_tiers[0]
     price = tier["listPrice"]
     unit = rate["unitInfo"]
-    if price["currencyCode"] != "USD" or float(tier["startAmount"]["value"]) != 0:
+    if price["currencyCode"] != "USD":
         raise ValueError("Unexpected Google pricing tier")
     amount = float(price.get("units", 0)) + price.get("nanos", 0) / 1e9
     return amount * units[unit["unit"]] / float(unit["unitQuantity"]["value"])
