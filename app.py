@@ -74,8 +74,8 @@ def main():
         updates = json.loads(args.inputs.read_text(encoding="utf-8")) if args.inputs else {}
         print(json.dumps(calculate(updates), indent=2))
     else:
-        print(f"Dashboard: http://127.0.0.1:{args.port}", flush=True)
-        ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
+        print(f"Dashboard: http://localhost:{args.port}", flush=True)
+        ThreadingHTTPServer(("0.0.0.0", args.port), Handler).serve_forever()
 
 
 if __name__ == "__main__":

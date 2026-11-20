@@ -2,16 +2,49 @@
 
 An IT457 Theme 3 MVP: a Python cost calculator with a local dashboard, an architecture comparison, and a break-even chart. This is a **hypothetical 500 TB / 50 VM workload**, chosen for the class exercise. It is not 37signals' actual infrastructure or invoice.
 
-## Run
+## Run with Docker
+
+Install and start Docker Desktop, then open PowerShell in this project folder (the folder containing `Dockerfile`). Build the image:
+
+```powershell
+docker build -t cloud-cost-dashboard .
+```
+
+Start the dashboard in a container:
+
+```powershell
+docker run --name cloud-cost-dashboard -p 8000:8000 cloud-cost-dashboard
+```
+
+Keep that terminal open and visit <http://localhost:8000>. Change assumptions in the sidebar. To stop the dashboard, press **Ctrl+C** in that terminal. To start it again later:
+
+```powershell
+docker start -a cloud-cost-dashboard
+```
+
+To remove the stopped container:
+
+```powershell
+docker rm cloud-cost-dashboard
+```
+
+If you have a `.env` file for the optional cloud price refresh feature, pass it into the container when starting it:
+
+```powershell
+docker run --name cloud-cost-dashboard --env-file .env -p 8000:8000 cloud-cost-dashboard
+```
+
+The `.env` file stays on your computer and is not copied into the image.
+
+### Run directly with Python instead
 
 Requires Python 3.10 or newer. The baseline runs with the Python standard library.
 
 ```powershell
-# Run from the project directory
 python app.py --serve
 ```
 
-Open <http://127.0.0.1:8000>. Change assumptions in the sidebar. The graph and itemized cost tables recalculate automatically. To export the entire calculation as JSON:
+Open <http://127.0.0.1:8000>. To export the entire calculation as JSON:
 
 ```powershell
 python app.py --json > baseline.json
